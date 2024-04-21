@@ -4,6 +4,8 @@ const lineWidth = document.getElementById("line-width");
 const color = document.getElementById("color");
 const colorOptions = Array.from(document.getElementsByClassName("color-option"));
 const modeBtn = document.getElementById("mode-btn");
+const drawBtn = document.getElementById("draw-btn");
+const fillBtn = document.getElementById("fill-btn");
 const destroyBtn = document.getElementById("destroy-btn");
 const eraserBtn = document.getElementById("eraser-btn");
 const fileInput = document.getElementById("file");
@@ -19,6 +21,12 @@ ctx.lineCap = "round";
 
   let isPainting = false;
   let isFilling = false;
+  let isErasing = false;
+
+  const PENCIL_MODE = 0;
+  const FILL_MODE = 1;
+  const ERASE_MODE = 2;
+  let mode = PENCIL_MODE;
 
   // draw when user clicks and drag (like normal drawing board.)
 function onMove(event){
@@ -27,6 +35,7 @@ function onMove(event){
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
    }else{
+    // text, fill, shapes should happen from this coordinate.
     ctx.moveTo(event.offsetX, event.offsetY);
    }
 }
@@ -54,10 +63,13 @@ function changeWidth(event){
 }
 
 function onColorClicked(event){
-    const colorValue = event.target.dataset.color;
-    ctx.strokeStyle = colorValue
-    ctx.fillStyle = colorValue;
-    color.value = colorValue;
+    if (isErasing == false) {
+        const colorValue = event.target.dataset.color;
+        ctx.strokeStyle = colorValue
+        ctx.fillStyle = colorValue;
+        color.value = colorValue;
+    }
+    // if eraser is selected, color change is ignored.
 }
 
 function onModeClick(event){
@@ -70,19 +82,39 @@ function onModeClick(event){
     }
 }
 
-function onDestroyClick(){
-    let originalColor = ctx.fillStyle;
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = originalColor;
-    modeBtn.innerText = "Fill";
+function onDrawClick(){
+    // make sure the icon is very small, otherwise it simply doesn't work.
+    // the x y coordinates must not be outside the pixel size of the image
+    // otherwise it simply does not work.
+    canvas.style.cursor = "url(icons/pencil.png) 0 22, auto";
     isFilling = false;
+    isErasing = false;
+}
+
+function onFillClick(){
+    canvas.style.cursor = "url(icons/paint.png), auto";
+    isFilling = true;
+    isErasing = false;
+}
+
+function onDestroyClick(){
+    if (confirm("Click OK to destroy your work")){
+        // destroy the canvas only when confirmed.
+        let originalColor = ctx.fillStyle;
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = originalColor;
+        modeBtn.innerText = "Fill";
+        isFilling = false;
+    }
 }
 
 function onEraserClick(){
     ctx.strokeStyle = "white";
     isFilling = false;
+    isErasing = true;
     modeBtn.innerText = "Fill";
+    canvas.style.cursor = "url(icons/eraser.png) 0 22, auto";
 }
 function onFileChange(event){
     const file = event.target.files[0];
@@ -115,6 +147,7 @@ function onSave(){
     anchor.click();
 }
 
+
 canvas.addEventListener("mousemove", onMove);
 canvas.addEventListener("click", onCanvasClick);
 canvas.addEventListener("mousedown", onMouseDown);
@@ -126,9 +159,12 @@ color.addEventListener("input", changeColor);
 
 colorOptions.forEach((color) => color.addEventListener("click", onColorClicked));
 modeBtn.addEventListener("click", onModeClick);
+drawBtn.addEventListener("click", onDrawClick);
+fillBtn.addEventListener("click", onFillClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraserBtn.addEventListener("click", onEraserClick);
 fileInput.addEventListener("change", onFileChange);
 canvas.addEventListener("dblclick", onDoubleClick);
 saveBtn.addEventListener("click", onSave);
 
+// crosshair for shape cursor
