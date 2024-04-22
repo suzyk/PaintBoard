@@ -21,10 +21,12 @@
     </div>
     <canvas width="300" height="300"></canvas>
     <div class="btns">
-        <input id="line-width" type="range" min="1" max="10" value="5" step="0.5"/>
-        <button id="mode-btn">🪣 Fill </button>
-        <button id="draw-btn">Draw</button>
-        <button id="fill-btn">Fill</button>
+        <div class="range">
+            <input id="line-width" type="range" min="1" max="10" value="5" step="1"/>
+            <div id="brush-thickness">5</div>
+        </div>
+        <button id="draw-btn"><img src="icons/pencil.png">Draw</button>
+        <button id="fill-btn"><img src="icons/paint.png">Fill</button>
         <button id="destroy-btn">💣 Destroy </button>
         <button id="eraser-btn">❌ Eraser </button>
         <label for="file">

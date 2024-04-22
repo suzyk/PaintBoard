@@ -1,9 +1,9 @@
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const lineWidth = document.getElementById("line-width");
+const brushThickness = document.getElementById("brush-thickness");
 const color = document.getElementById("color");
 const colorOptions = Array.from(document.getElementsByClassName("color-option"));
-const modeBtn = document.getElementById("mode-btn");
 const drawBtn = document.getElementById("draw-btn");
 const fillBtn = document.getElementById("fill-btn");
 const destroyBtn = document.getElementById("destroy-btn");
@@ -26,11 +26,26 @@ ctx.lineCap = "round";
   const PENCIL_MODE = 0;
   const FILL_MODE = 1;
   const ERASE_MODE = 2;
-  let mode = PENCIL_MODE;
 
+
+function setCursor(mode){
+    if (mode == PENCIL_MODE){
+        canvas.style.cursor = "url(icons/pencil.png) 0 22, auto";
+    }else if(mode == FILL_MODE){
+        canvas.style.cursor = "url(icons/paint.png), auto";
+    }else if(mode == ERASE_MODE){
+        canvas.style.cursor = "url(icons/eraser.png) 0 22, auto";
+    }else{
+        canvas.style.cursor = auto;
+    }
+}
   // draw when user clicks and drag (like normal drawing board.)
 function onMove(event){
-
+    if(isErasing){
+        ctx.strokeStyle = "white";
+    }else{
+        ctx.strokeStyle = color.value;
+    }
    if (isPainting) {
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
@@ -60,39 +75,27 @@ function cancelPainting(){
 
 function changeWidth(event){
     ctx.lineWidth = event.target.value;
+    brushThickness.textContent = event.target.value;
 }
 
 function onColorClicked(event){
-    if (isErasing == false) {
-        const colorValue = event.target.dataset.color;
-        ctx.strokeStyle = colorValue
-        ctx.fillStyle = colorValue;
-        color.value = colorValue;
-    }
-    // if eraser is selected, color change is ignored.
-}
-
-function onModeClick(event){
-    if (isFilling){
-        isFilling = false;
-        modeBtn.innerText = "Fill";
-    }else {
-        isFilling = true;
-        modeBtn.innerText = "Draw";
-    }
+    const colorValue = event.target.dataset.color;
+    ctx.strokeStyle = colorValue
+    ctx.fillStyle = colorValue;
+    color.value = colorValue;
 }
 
 function onDrawClick(){
     // make sure the icon is very small, otherwise it simply doesn't work.
     // the x y coordinates must not be outside the pixel size of the image
     // otherwise it simply does not work.
-    canvas.style.cursor = "url(icons/pencil.png) 0 22, auto";
+    setCursor(PENCIL_MODE);
     isFilling = false;
     isErasing = false;
 }
 
 function onFillClick(){
-    canvas.style.cursor = "url(icons/paint.png), auto";
+    setCursor(FILL_MODE);
     isFilling = true;
     isErasing = false;
 }
@@ -104,7 +107,6 @@ function onDestroyClick(){
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = originalColor;
-        modeBtn.innerText = "Fill";
         isFilling = false;
     }
 }
@@ -113,8 +115,7 @@ function onEraserClick(){
     ctx.strokeStyle = "white";
     isFilling = false;
     isErasing = true;
-    modeBtn.innerText = "Fill";
-    canvas.style.cursor = "url(icons/eraser.png) 0 22, auto";
+    setCursor(ERASE_MODE);
 }
 function onFileChange(event){
     const file = event.target.files[0];
@@ -153,12 +154,12 @@ canvas.addEventListener("click", onCanvasClick);
 canvas.addEventListener("mousedown", onMouseDown);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
+setCursor(PENCIL_MODE);
 
 lineWidth.addEventListener("input", changeWidth);
 color.addEventListener("input", changeColor);
 
 colorOptions.forEach((color) => color.addEventListener("click", onColorClicked));
-modeBtn.addEventListener("click", onModeClick);
 drawBtn.addEventListener("click", onDrawClick);
 fillBtn.addEventListener("click", onFillClick);
 destroyBtn.addEventListener("click", onDestroyClick);
