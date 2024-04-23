@@ -8,19 +8,12 @@ body {
     background-color: gainsboro;
     padding: 20px;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-
-    /*cursor: url('https://cur.cursors-4u.net/nature/nat-10/nat927.ani'), url('https://cur.cursors-4u.net/nature/nat-10/nat927.png'), crosshair;
-    cursor: url('icon/Pencil.jpg'), crosshair;*/
-    
-    /* background-image: url('icons/pencil.jpg');
-     */
 }
 
 canvas {
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-    
 }
 
 body{
@@ -68,7 +61,6 @@ input#color {
     background-color:white;
 }
     
-
 button, label {
     all:unset;
     width: 200px;

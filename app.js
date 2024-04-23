@@ -20,33 +20,37 @@ ctx.lineCap = "round";
 // multi line selection shift, option, i
 
   let isPainting = false;
-  let isFilling = false;
-  let isErasing = false;
 
   const PENCIL_MODE = 0;
   const FILL_MODE = 1;
   const ERASE_MODE = 2;
+  const TEXT_MODE = 3;
+  let mode = PENCIL_MODE;
 
 
-function setCursor(mode){
+  // update the mode and set the cursor image.
+function setTools(newMode){
+    mode = newMode;
     if (mode == PENCIL_MODE){
         canvas.style.cursor = "url(icons/pencil.png) 0 22, auto";
     }else if(mode == FILL_MODE){
         canvas.style.cursor = "url(icons/paint.png), auto";
     }else if(mode == ERASE_MODE){
         canvas.style.cursor = "url(icons/eraser.png) 0 22, auto";
+    }else if(mode == TEXT_MODE){
+        canvas.style.cursor = "default";
     }else{
         canvas.style.cursor = auto;
     }
 }
   // draw when user clicks and drag (like normal drawing board.)
 function onMove(event){
-    if(isErasing){
+    if(mode == ERASE_MODE){
         ctx.strokeStyle = "white";
     }else{
         ctx.strokeStyle = color.value;
     }
-   if (isPainting) {
+   if (isPainting && mode != TEXT_MODE) {
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
    }else{
@@ -56,7 +60,7 @@ function onMove(event){
 }
 
 function onCanvasClick(event){
-   if (isFilling) {
+   if (mode == FILL_MODE) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
    }
 }
@@ -89,15 +93,11 @@ function onDrawClick(){
     // make sure the icon is very small, otherwise it simply doesn't work.
     // the x y coordinates must not be outside the pixel size of the image
     // otherwise it simply does not work.
-    setCursor(PENCIL_MODE);
-    isFilling = false;
-    isErasing = false;
+    setTools(PENCIL_MODE);
 }
 
 function onFillClick(){
-    setCursor(FILL_MODE);
-    isFilling = true;
-    isErasing = false;
+    setTools(FILL_MODE);
 }
 
 function onDestroyClick(){
@@ -113,9 +113,8 @@ function onDestroyClick(){
 
 function onEraserClick(){
     ctx.strokeStyle = "white";
-    isFilling = false;
-    isErasing = true;
-    setCursor(ERASE_MODE);
+    setTools(ERASE_MODE);
+    mode = ERASE_MODE;
 }
 function onFileChange(event){
     const file = event.target.files[0];
@@ -140,6 +139,11 @@ function onDoubleClick(event){
     }
 }
 
+function onTextboxClick(){
+    setTools(TEXT_MODE);
+    isPainting = false;
+}
+
 function onSave(){
     const url = canvas.toDataURL();
     const anchor = document.createElement("a");
@@ -154,7 +158,7 @@ canvas.addEventListener("click", onCanvasClick);
 canvas.addEventListener("mousedown", onMouseDown);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
-setCursor(PENCIL_MODE);
+setTools(PENCIL_MODE);
 
 lineWidth.addEventListener("input", changeWidth);
 color.addEventListener("input", changeColor);
@@ -165,6 +169,7 @@ fillBtn.addEventListener("click", onFillClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraserBtn.addEventListener("click", onEraserClick);
 fileInput.addEventListener("change", onFileChange);
+textInput.addEventListener("click", onTextboxClick);
 canvas.addEventListener("dblclick", onDoubleClick);
 saveBtn.addEventListener("click", onSave);
 
