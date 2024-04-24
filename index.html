@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meme-Maker</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css", "buttons.css">
 </head>
 <body>
     <div class="color-options">
@@ -33,6 +33,9 @@
             Add Photo
             <input type="file" accept="image/*" id="file" />
         </label>
+        <input type="number" min="20" value="25" id="fontSize">
+        <select name="fonts" id="fontTypes" autocomplete="off">
+          </select>
         <input type="text" placeholder="Wrtie and then double click." id="text" />
         <button id="save">🏞️ Save Image</button>
     </div>

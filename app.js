@@ -10,6 +10,8 @@ const destroyBtn = document.getElementById("destroy-btn");
 const eraserBtn = document.getElementById("eraser-btn");
 const fileInput = document.getElementById("file");
 const textInput = document.getElementById("text");
+const fontSelector = document.getElementById("fontTypes");
+const fontSize = document.getElementById("fontSize");
 const saveBtn = document.getElementById("save");
 
 canvas.width = 700;   //resetting the size in CSS causes up with cursor and drawing gap
@@ -26,21 +28,45 @@ ctx.lineCap = "round";
   const ERASE_MODE = 2;
   const TEXT_MODE = 3;
   let mode = PENCIL_MODE;
+  const ACTIVATE_CLASSNAME = "activated";
 
 
+function clearBtnActivate(newMode){
+    // only these four modes inactivates the old button press.
+    if((newMode != PENCIL_MODE) && 
+        (newMode != FILL_MODE) && 
+        (newMode != ERASE_MODE) &&
+        (newMode != TEXT_MODE)){
+        return;
+    }
+
+    if (mode == PENCIL_MODE){
+        drawBtn.classList.remove(ACTIVATE_CLASSNAME);
+    }else if(mode == FILL_MODE){
+        fillBtn.classList.remove(ACTIVATE_CLASSNAME);
+    }else if(mode == ERASE_MODE){
+        eraserBtn.classList.remove(ACTIVATE_CLASSNAME);
+    }
+}
   // update the mode and set the cursor image.
 function setTools(newMode){
+    // first disable activate on the current button.
+    clearBtnActivate(newMode);
+    // mode should update after clearing the old mode
     mode = newMode;
     if (mode == PENCIL_MODE){
+        drawBtn.classList.add(ACTIVATE_CLASSNAME);
         canvas.style.cursor = "url(icons/pencil.png) 0 22, auto";
     }else if(mode == FILL_MODE){
+        fillBtn.classList.add(ACTIVATE_CLASSNAME);
         canvas.style.cursor = "url(icons/paint.png), auto";
     }else if(mode == ERASE_MODE){
+        eraserBtn.classList.add(ACTIVATE_CLASSNAME);
         canvas.style.cursor = "url(icons/eraser.png) 0 22, auto";
     }else if(mode == TEXT_MODE){
         canvas.style.cursor = "default";
     }else{
-        canvas.style.cursor = auto;
+        canvas.style.cursor = "default";
     }
 }
   // draw when user clicks and drag (like normal drawing board.)
@@ -101,6 +127,7 @@ function onFillClick(){
 }
 
 function onDestroyClick(){
+    clearBtnActivate();
     if (confirm("Click OK to destroy your work")){
         // destroy the canvas only when confirmed.
         let originalColor = ctx.fillStyle;
@@ -116,7 +143,9 @@ function onEraserClick(){
     setTools(ERASE_MODE);
     mode = ERASE_MODE;
 }
+
 function onFileChange(event){
+    clearBtnActivate();
     const file = event.target.files[0];
     const url = URL.createObjectURL(file);
     const image = new Image();
@@ -133,7 +162,7 @@ function onDoubleClick(event){
     if (text !== ""){
         ctx.save();
         ctx.lineWidth = 1;
-        ctx.font = "48px serif";
+        ctx.font = `${fontSize.value}px ${fontSelector.value}`;
         ctx.fillText(text, event.offsetX, event.offsetY);
         ctx.restore();
     }
@@ -145,6 +174,7 @@ function onTextboxClick(){
 }
 
 function onSave(){
+    clearBtnActivate();
     const url = canvas.toDataURL();
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -152,6 +182,38 @@ function onSave(){
     anchor.click();
 }
 
+function loadFontOptions(){
+    let newOption = new Option("Arial", "arial");
+    fontSelector.add(newOption,undefined);
+    newOption = new Option("Courier new", "courier new");
+    fontSelector.add(newOption,undefined);
+    newOption = new Option("Times New Roman", "times new roman");
+    fontSelector.add(newOption,undefined);
+    newOption = new Option("Brush Script MT", "brush script mt");
+    fontSelector.add(newOption,undefined);
+
+    // custom fonts
+    let f1 = new FontFace("CherryToday", "url('fonts/CherryToday.ttf')");
+    f1.load().then(() => {
+        let newOption = new Option("Cherry Today", "CherryToday");
+        fontSelector.add(newOption,undefined);
+        document.fonts.add(f1);
+    },
+    (err) => {
+      console.error("Cherry Today font failed to load");
+    });
+
+    let f2 = new FontFace("Orange Juice", "url('fonts/orange juice 2.0.ttf')");
+    f2.load().then(() => {
+        let newOption = new Option("Orange Juice", "orange juice");
+        fontSelector.add(newOption,undefined);
+        document.fonts.add(f2);
+    },
+    (err) => {
+      console.error("Orange juice font failed to load");
+    });
+    
+}
 
 canvas.addEventListener("mousemove", onMove);
 canvas.addEventListener("click", onCanvasClick);
@@ -159,6 +221,7 @@ canvas.addEventListener("mousedown", onMouseDown);
 canvas.addEventListener("mouseup", cancelPainting);
 canvas.addEventListener("mouseleave", cancelPainting);
 setTools(PENCIL_MODE);
+loadFontOptions();
 
 lineWidth.addEventListener("input", changeWidth);
 color.addEventListener("input", changeColor);
