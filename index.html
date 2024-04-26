@@ -27,16 +27,23 @@
         </div>
         <button id="draw-btn"><img src="icons/pencil.png">Draw</button>
         <button id="fill-btn"><img src="icons/paint.png">Fill</button>
-        <button id="destroy-btn">💣 Destroy </button>
         <button id="eraser-btn">❌ Eraser </button>
+        <button id="rectangle-btn">Rectangle</button>
+        <button id="circle-btn">Circle</button>
+        <button id="destroy-btn">💣 Destroy </button>
         <label for="file">
             Add Photo
             <input type="file" accept="image/*" id="file" />
         </label>
-        <input type="number" min="20" value="25" id="fontSize">
-        <select name="fonts" id="fontTypes" autocomplete="off">
-          </select>
-        <input type="text" placeholder="Wrtie and then double click." id="text" />
+        <div id="text-controls">
+            <input type="number" min="20" value="25" id="fontSize">
+             <select name="fonts" id="fontTypes" autocomplete="off"></select>
+            <select id="text-style" >
+                <option value="fill">Fill Text</option>
+                <option value="stroke">Stroke Text</option>
+            </select>
+            <input type="text" placeholder="Wrtie and then double click." id="text" />
+        </div>
         <button id="save">🏞️ Save Image</button>
     </div>
     <script src="app.js"></script>

@@ -8,11 +8,15 @@ const drawBtn = document.getElementById("draw-btn");
 const fillBtn = document.getElementById("fill-btn");
 const destroyBtn = document.getElementById("destroy-btn");
 const eraserBtn = document.getElementById("eraser-btn");
+const rectangleBtn = document.getElementById("rectangle-btn");
+const circleBtn = document.getElementById("circle-btn");
 const fileInput = document.getElementById("file");
 const textInput = document.getElementById("text");
+const textStyleSelector = document.getElementById("text-style");
 const fontSelector = document.getElementById("fontTypes");
 const fontSize = document.getElementById("fontSize");
 const saveBtn = document.getElementById("save");
+
 
 canvas.width = 700;   //resetting the size in CSS causes up with cursor and drawing gap
 canvas.height = 700;
@@ -27,8 +31,14 @@ ctx.lineCap = "round";
   const FILL_MODE = 1;
   const ERASE_MODE = 2;
   const TEXT_MODE = 3;
+  const RECTANGLE_MODE = 4;
+  const CIRCLE_MODE = 5;
   let mode = PENCIL_MODE;
   const ACTIVATE_CLASSNAME = "activated";
+  const TEXT_STYLE_FILL = "fill";
+  const TEXT_STYLE_STROKE = "stroke";
+
+  let shapeStart = {x:0.0, y:0.0};
 
 
 function clearBtnActivate(newMode){
@@ -36,7 +46,9 @@ function clearBtnActivate(newMode){
     if((newMode != PENCIL_MODE) && 
         (newMode != FILL_MODE) && 
         (newMode != ERASE_MODE) &&
-        (newMode != TEXT_MODE)){
+        (newMode != TEXT_MODE) &&
+        (newMode != RECTANGLE_MODE) &&
+        (newMode != CIRCLE_MODE)){
         return;
     }
 
@@ -46,6 +58,10 @@ function clearBtnActivate(newMode){
         fillBtn.classList.remove(ACTIVATE_CLASSNAME);
     }else if(mode == ERASE_MODE){
         eraserBtn.classList.remove(ACTIVATE_CLASSNAME);
+    }else if(mode == RECTANGLE_MODE ){
+        rectangleBtn.classList.remove(ACTIVATE_CLASSNAME);
+    }else if(mode == CIRCLE_MODE) {
+        circleBtn.classList.remove(ACTIVATE_CLASSNAME);
     }
 }
   // update the mode and set the cursor image.
@@ -65,6 +81,12 @@ function setTools(newMode){
         canvas.style.cursor = "url(icons/eraser.png) 0 22, auto";
     }else if(mode == TEXT_MODE){
         canvas.style.cursor = "default";
+    }else if(mode == RECTANGLE_MODE){
+        rectangleBtn.classList.add(ACTIVATE_CLASSNAME);
+        canvas.style.cursor = "crosshair";
+    }else if(mode == CIRCLE_MODE){
+        circleBtn.classList.add(ACTIVATE_CLASSNAME);   
+        canvas.style.cursor = "crosshair";
     }else{
         canvas.style.cursor = "default";
     }
@@ -73,16 +95,27 @@ function setTools(newMode){
 function onMove(event){
     if(mode == ERASE_MODE){
         ctx.strokeStyle = "white";
+    }else if (mode == TEXT_MODE){
+        return;   
     }else{
         ctx.strokeStyle = color.value;
     }
-   if (isPainting && mode != TEXT_MODE) {
+   
+    let w = event.offsetX - shapeStart.x;
+    let h = event.offsetY - shapeStart.y;
+    if(isPainting && mode == RECTANGLE_MODE){
+        ctx.fillRect(shapeStart.x, shapeStart.y, w, h);
+    }else if (isPainting && mode == CIRCLE_MODE){
+        let radius = Math.sqrt(w*w + h*h);
+        ctx.arc(shapeStart.x, shapeStart.y, radius, 0, 2 * Math.PI);
+        ctx.fill();
+    }else if (isPainting) { 
         ctx.lineTo(event.offsetX, event.offsetY);
         ctx.stroke();
-   }else{
+    }else{
     // text, fill, shapes should happen from this coordinate.
-    ctx.moveTo(event.offsetX, event.offsetY);
-   }
+        ctx.moveTo(event.offsetX, event.offsetY);
+    }
 }
 
 function onCanvasClick(event){
@@ -94,8 +127,10 @@ function changeColor(event){
     ctx.strokeStyle = event.target.value;
 }
 
-function onMouseDown(){
+function onMouseDown(event){
     isPainting = true;
+    shapeStart.x = event.offsetX;
+    shapeStart.y = event.offsetY;
 }
 
 function cancelPainting(){
@@ -141,7 +176,14 @@ function onDestroyClick(){
 function onEraserClick(){
     ctx.strokeStyle = "white";
     setTools(ERASE_MODE);
-    mode = ERASE_MODE;
+}
+
+function onRectangleClick(){
+    setTools(RECTANGLE_MODE);
+}
+
+function onCircleClick(){
+    setTools(CIRCLE_MODE);
 }
 
 function onFileChange(event){
@@ -154,7 +196,7 @@ function onFileChange(event){
     image.onload = function () {
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
         fileInput.value = null;
-      };
+    };
 }
 
 function onDoubleClick(event){
@@ -163,7 +205,12 @@ function onDoubleClick(event){
         ctx.save();
         ctx.lineWidth = 1;
         ctx.font = `${fontSize.value}px ${fontSelector.value}`;
-        ctx.fillText(text, event.offsetX, event.offsetY);
+        if(textStyleSelector.value == TEXT_STYLE_FILL){
+            ctx.fillText(text, event.offsetX, event.offsetY);
+        }else{ // only two options. This is stroke text
+            ctx.strokeText(text, event.offsetX, event.offsetY);
+        }
+        
         ctx.restore();
     }
 }
@@ -231,6 +278,8 @@ drawBtn.addEventListener("click", onDrawClick);
 fillBtn.addEventListener("click", onFillClick);
 destroyBtn.addEventListener("click", onDestroyClick);
 eraserBtn.addEventListener("click", onEraserClick);
+rectangleBtn.addEventListener("click", onRectangleClick);
+circleBtn.addEventListener("click", onCircleClick);
 fileInput.addEventListener("change", onFileChange);
 textInput.addEventListener("click", onTextboxClick);
 canvas.addEventListener("dblclick", onDoubleClick);
