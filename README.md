@@ -1,4 +1,4 @@
-# "PaintBoard"
+# PaintBoard
 A drawing app using canvas API in Vanilla JS
 Add live link here
 
